@@ -1,5 +1,5 @@
 import { useState } from 'react'
-import { ChakraProvider, Box, VStack, Heading, Button, Image, Text, Container, SimpleGrid, Progress, Accordion, AccordionItem, AccordionButton, AccordionPanel, AccordionIcon, Badge, Stat, StatLabel, StatNumber, StatHelpText, Divider } from '@chakra-ui/react'
+import { ChakraProvider, Box, VStack, Heading, Button, Image, Text, Container, SimpleGrid, Progress, Accordion, AccordionItem, AccordionButton, AccordionPanel, AccordionIcon, Badge, Stat, StatLabel, StatNumber, StatHelpText, Divider, Alert, AlertIcon, AlertTitle, AlertDescription } from '@chakra-ui/react'
 import { extendTheme } from '@chakra-ui/react'
 
 // Create a theme instance
@@ -17,12 +17,14 @@ function App() {
   const [image, setImage] = useState(null)
   const [isLoading, setIsLoading] = useState(false)
   const [analysis, setAnalysis] = useState(null)
+  const [error, setError] = useState(null)
 
   const handleCapture = async (e) => {
     const file = e.target.files[0]
     if (file) {
       setImage(URL.createObjectURL(file))
       setIsLoading(true)
+      setError(null)
 
       const formData = new FormData()
       formData.append('receipt', file)
@@ -34,14 +36,15 @@ function App() {
         })
 
         if (!response.ok) {
-          throw new Error('Failed to analyze receipt')
+          throw new Error(`Failed to analyze receipt: ${response.status} ${response.statusText}`)
         }
 
         const data = await response.json()
         setAnalysis(data)
       } catch (error) {
         console.error('Error analyzing receipt:', error)
-        // You might want to show an error message to the user here
+        setError(error.message || 'Failed to analyze receipt. Please try again.')
+        setAnalysis(null)
       } finally {
         setIsLoading(false)
       }
@@ -67,6 +70,16 @@ function App() {
               Take Receipt Photo
             </Button>
           </Box>
+
+          {error && (
+            <Alert status="error" borderRadius="md">
+              <AlertIcon />
+              <Box>
+                <AlertTitle>Error</AlertTitle>
+                <AlertDescription>{error}</AlertDescription>
+              </Box>
+            </Alert>
+          )}
 
           {image && (
             <Box w="full">
