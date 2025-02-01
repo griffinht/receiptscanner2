@@ -28,7 +28,7 @@ function App() {
       formData.append('receipt', file)
 
       try {
-        const response = await fetch('http://localhost:3000/api/analyze-receipt', {
+        const response = await fetch('/api/analyze-receipt', {
           method: 'POST',
           body: formData
         })
